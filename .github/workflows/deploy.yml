@@ -12,21 +12,17 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
       - uses: actions/checkout@v4
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-west-2
-
       - name: Sync to S3
-        run: |
-          aws s3 sync ./website s3://yashjagani.com --delete
-
+        run: aws s3 sync ./website s3://yashjagani.com --delete
       - name: CloudFront Invalidation
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_ID }} \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \   # ← fixed name
             --paths "/*"
