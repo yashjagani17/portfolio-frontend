@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Yash Jagani</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">YJ<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="projects.html" class="active">Projects</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="section-inner">
+
+  <div class="page-hero">
+    <div class="page-hero-label">Selected work</div>
+    <h1>Projects</h1>
+    <p class="page-hero-desc">Cloud infrastructure projects built with Terraform, AWS, and GCP — emphasising security-first architecture, automation, and observability.</p>
+  </div>
+
+  <!-- ═══ PROJECT 01 ═══ -->
+  <div class="project-full reveal" id="weather">
+    <div class="pf-header">
+      <div class="pf-num">01 / 02</div>
+      <div class="pf-title">FastAPI Weather Dashboard</div>
+      <div class="pf-tag-row">
+        <span class="tag">AWS</span>
+        <span class="tag">Terraform</span>
+        <span class="tag">Docker</span>
+        <span class="tag">ECS Fargate</span>
+        <span class="tag">CloudFront</span>
+        <span class="tag">ALB</span>
+        <span class="tag tag-blue">Zero Trust</span>
+        <span class="tag tag-blue">IaC</span>
+      </div>
+      <div class="pf-actions" style="margin-top:18px">
+        <a class="btn btn-primary btn-sm" href="weather.html">⤢ Full Page Demo</a>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/yashjagani17" target="_blank" rel="noopener">↗ View on GitHub</a>
+      </div>
+    </div>
+
+    <div class="pf-body">
+      <div class="pf-col">
+        <div class="pf-col-title">Overview</div>
+        <p>A production-grade serverless weather application built on a Zero Trust security model. The entire backend runs inside <strong>private subnets</strong> — no direct internet access, no public IPs on any task.</p>
+        <p>CloudFront acts as the single entry point. A custom HTTP header is injected into every CloudFront request; the ALB listener rule rejects anything missing that header. This means even if someone discovers the ALB DNS name, they can't reach the backend directly.</p>
+        <p>All infrastructure is declared in Terraform and deployed via a GitHub Actions CI/CD pipeline. No manual AWS console clicks required after the initial bootstrap.</p>
+      </div>
+      <div class="pf-col">
+        <div class="pf-col-title">Key technical decisions</div>
+        <ul>
+          <li>ECS Fargate chosen over EC2 to eliminate OS patching and right-sizing overhead</li>
+          <li>Multi-AZ VPC with public/private subnet separation; NAT Gateway for outbound-only internet from private tasks</li>
+          <li>ALB security group only allows inbound from CloudFront managed prefix list</li>
+          <li>CloudFront origin custom header stored in SSM Parameter Store (SecureString) — never hardcoded</li>
+          <li>Docker images built and scanned in CI, pushed to Amazon ECR on clean build</li>
+          <li>Terraform state stored remotely in S3 with DynamoDB locking</li>
+          <li>API key for OpenWeatherMap stored in SSM, retrieved at Lambda cold-start and cached in memory</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pf-arch">
+      <div class="pf-col-title" style="margin-bottom:12px">Architecture components</div>
+      <div class="arch-chips">
+        <span class="arch-chip"><span class="dot"></span>CloudFront CDN</span>
+        <span class="arch-chip"><span class="dot"></span>Application Load Balancer</span>
+        <span class="arch-chip"><span class="dot"></span>ECS Fargate (private subnet)</span>
+        <span class="arch-chip"><span class="dot"></span>Amazon ECR</span>
+        <span class="arch-chip"><span class="dot"></span>API Gateway + Lambda</span>
+        <span class="arch-chip"><span class="dot"></span>SSM Parameter Store</span>
+        <span class="arch-chip"><span class="dot"></span>Multi-AZ VPC</span>
+        <span class="arch-chip"><span class="dot"></span>NAT Gateway</span>
+        <span class="arch-chip"><span class="dot"></span>GitHub Actions CI/CD</span>
+        <span class="arch-chip"><span class="dot"></span>Terraform (IaC)</span>
+        <span class="arch-chip"><span class="dot"></span>S3 + DynamoDB (remote state)</span>
+        <span class="arch-chip"><span class="dot"></span>OpenWeatherMap API</span>
+      </div>
+    </div>
+
+    <!-- LIVE DEMO -->
+    <div class="pf-demo">
+      <div class="demo-header">
+        <span><span class="demo-badge"><span class="live-dot"></span> Live endpoint</span> &nbsp; POST /weather &rarr; 3-day forecast</span>
+        <span style="font-size:11px;color:var(--muted2)">Requires hosting on yashjagani.com (CORS)</span>
+      </div>
+      <div class="weather-widget">
+        <div class="weather-search">
+          <input class="weather-input" id="pj-city" type="text" placeholder="Enter a city to fetch its 3-day forecast...">
+          <button class="btn btn-primary btn-sm" onclick="pjFetch()">Fetch weather</button>
+        </div>
+        <div class="weather-status" id="pj-status"></div>
+        <div class="forecast-grid" id="pj-grid" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══ PROJECT 02 ═══ -->
+  <div class="project-full reveal" id="devsecops">
+    <div class="pf-header">
+      <div class="pf-num">02 / 02</div>
+      <div class="pf-title">DevSecOps Flask Project</div>
+      <div class="pf-tag-row">
+        <span class="tag">GCP</span>
+        <span class="tag">Terraform</span>
+        <span class="tag">Docker</span>
+        <span class="tag">Kubernetes (GKE)</span>
+        <span class="tag">Trivy</span>
+        <span class="tag">Prometheus</span>
+        <span class="tag">Grafana</span>
+        <span class="tag tag-blue">DevSecOps</span>
+        <span class="tag tag-blue">CI/CD</span>
+      </div>
+      <div class="pf-actions" style="margin-top:18px">
+        <a class="btn btn-ghost btn-sm" href="https://github.com/yashjagani17" target="_blank" rel="noopener">↗ View on GitHub</a>
+      </div>
+    </div>
+
+    <div class="pf-body">
+      <div class="pf-col">
+        <div class="pf-col-title">Overview</div>
+        <p>A complete DevSecOps pipeline demonstrating how to embed security scanning into the deployment process for a containerised Python web application running on Google Kubernetes Engine.</p>
+        <p>The pipeline treats security as a <strong>hard gate</strong>: if Trivy finds HIGH or CRITICAL CVEs in the container image, the GitHub Actions workflow fails immediately and the image never reaches the registry. No exceptions.</p>
+        <p>Once deployed, Prometheus scrapes cluster metrics every 15 seconds. Grafana dashboards surface pod health, resource utilisation, and custom application metrics in real time.</p>
+      </div>
+      <div class="pf-col">
+        <div class="pf-col-title">Key technical decisions</div>
+        <ul>
+          <li>Trivy runs against the local Docker image before any push — catches vulnerabilities before they touch the registry</li>
+          <li>Base image pinned to a specific SHA256 digest in the Dockerfile — prevents silent upstream changes</li>
+          <li>GKE Autopilot chosen to reduce node management overhead while keeping Kubernetes flexibility</li>
+          <li>Terraform manages GKE cluster, VPC, and IAM bindings — all infrastructure version-controlled</li>
+          <li>Kubernetes secrets stored in Google Secret Manager, injected at pod startup via Workload Identity</li>
+          <li>Prometheus alerts configured for pod crash-looping, high memory, and request error rate spikes</li>
+          <li>Grafana alert webhooks push to a Slack channel for immediate incident awareness</li>
+          <li>Trello board linked to GitHub branches — PR merge triggers deployment pipeline automatically</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="pf-arch">
+      <div class="pf-col-title" style="margin-bottom:12px">Architecture components</div>
+      <div class="arch-chips">
+        <span class="arch-chip"><span class="dot"></span>GitHub Actions CI/CD</span>
+        <span class="arch-chip"><span class="dot"></span>Trivy (CVE scanning)</span>
+        <span class="arch-chip"><span class="dot"></span>Docker / GCR</span>
+        <span class="arch-chip"><span class="dot"></span>Google Kubernetes Engine</span>
+        <span class="arch-chip"><span class="dot"></span>Terraform (IaC)</span>
+        <span class="arch-chip"><span class="dot"></span>Google Secret Manager</span>
+        <span class="arch-chip"><span class="dot"></span>Workload Identity</span>
+        <span class="arch-chip"><span class="dot"></span>Prometheus</span>
+        <span class="arch-chip"><span class="dot"></span>Grafana</span>
+        <span class="arch-chip"><span class="dot"></span>kube-state-metrics</span>
+        <span class="arch-chip"><span class="dot"></span>Flask (Python)</span>
+        <span class="arch-chip"><span class="dot"></span>Trello (project mgmt)</span>
+      </div>
+    </div>
+
+    <!-- CI/CD Pipeline visual -->
+    <div style="padding:24px 36px;border-top:1px solid var(--border);background:var(--bg3)">
+      <div class="pf-col-title" style="margin-bottom:16px">CI/CD pipeline flow</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
+        <span style="padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px">git push</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px">GitHub Actions trigger</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px">docker build</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.3);border-radius:4px;color:var(--accent)">trivy scan</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px">push to GCR</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px">terraform apply</span>
+        <span style="color:var(--muted2)">→</span>
+        <span style="padding:6px 12px;background:rgba(0,170,255,0.1);border:1px solid rgba(0,170,255,0.3);border-radius:4px;color:var(--accent2)">GKE deploy</span>
+      </div>
+      <p style="font-size:11px;color:var(--muted2);margin-top:12px">Pipeline halts at <span style="color:var(--accent)">trivy scan</span> if HIGH/CRITICAL CVEs are found — image never reaches GCR.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">YJ<span>.</span></div>
+  <div>Yash Jagani &middot; Cloud &amp; DevOps Engineer</div>
+  <div style="margin-top:6px"><a href="index.html" style="color:var(--accent)">← Back to portfolio</a></div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+function weatherIcon(icon) {
+  const m = {'01d':'☀️','01n':'🌙','02d':'⛅','02n':'☁️','03d':'☁️','03n':'☁️','04d':'☁️','04n':'☁️','09d':'🌧️','09n':'🌧️','10d':'🌦️','10n':'🌧️','11d':'⛈️','11n':'⛈️','13d':'❄️','13n':'❄️','50d':'🌫️','50n':'🌫️'};
+  return m[icon] || '🌡️';
+}
+function formatDate(str) {
+  return new Date(str).toLocaleDateString('en-GB', { weekday:'short', month:'short', day:'numeric' });
+}
+
+async function pjFetch() {
+  const city = document.getElementById('pj-city').value.trim();
+  if (!city) return;
+  const status = document.getElementById('pj-status');
+  const grid   = document.getElementById('pj-grid');
+  status.innerHTML = 'Fetching forecast<span class="loading"></span>';
+  status.className = 'weather-status';
+  grid.style.display = 'none';
+  try {
+    const res  = await fetch('https://328mtk9dai.execute-api.eu-west-2.amazonaws.com/weather', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ city })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'API error');
+    const forecasts = data.forecasts || [];
+    grid.innerHTML = forecasts.map(f => `
+      <div class="forecast-card">
+        <div class="fc-date">${formatDate(f.date)}</div>
+        <div class="fc-icon">${weatherIcon(f.icon)}</div>
+        <div class="fc-temp">${f.temp}°C</div>
+        <div class="fc-feels">Feels like ${f.feels_like}°C</div>
+        <div class="fc-desc">${f.description}</div>
+        <div class="fc-humidity">💧 ${f.humidity}%</div>
+      </div>`).join('');
+    status.textContent = `${data.city}${data.country ? ', ' + data.country : ''} — 3-day forecast`;
+    grid.style.display = 'grid';
+  } catch(e) {
+    status.textContent = 'CORS restricted to yashjagani.com. Deploy the site there or test the full-page demo locally.';
+    status.className = 'weather-status weather-error';
+  }
+}
+document.getElementById('pj-city').addEventListener('keydown', e => { if(e.key==='Enter') pjFetch(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Yash Jagani</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">YJ<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="blog.html" class="active">Blog</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="section-inner">
+
+  <div class="page-hero">
+    <div class="page-hero-label">Writing</div>
+    <h1>Blog</h1>
+    <p class="page-hero-desc">Notes on cloud infrastructure, DevSecOps, and things I've learnt building on AWS and GCP. Updated as I build.</p>
+  </div>
+
+  <div class="blog-page-list" id="blog-page-list">
+    <!-- Populated by blog-data.js -->
+    <div style="padding:2rem;color:var(--muted2);font-size:13px">Loading posts<span class="loading"></span></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">YJ<span>.</span></div>
+  <div>Yash Jagani &middot; Cloud &amp; DevOps Engineer</div>
+  <div style="margin-top:6px"><a href="index.html" style="color:var(--accent)">← Back to portfolio</a></div>
+</footer>
+
+<script>
+// ── SCROLL REVEAL
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.08 });
+
+function renderBlog(posts) {
+  const list = document.getElementById('blog-page-list');
+  list.innerHTML = posts.map((p, i) => `
+    <article class="blog-post-card reveal" id="${p.id}" style="transition-delay:${i * 0.08}s">
+      <div class="bp-header">
+        <div class="bp-meta">
+          <span class="bp-date">${p.date}</span>
+          <span class="t-dim" style="font-size:11px">·</span>
+          <span class="bp-read">${p.readTime}</span>
+        </div>
+        <div class="bp-title">${p.title}</div>
+        <div class="bp-excerpt">${p.excerpt}</div>
+      </div>
+      <div class="post-body" id="body-${p.id}">${p.body}</div>
+      <div class="bp-footer">
+        <div class="bp-tags"><span class="tag">${p.tag}</span></div>
+        <button class="bp-more" onclick="togglePost('${p.id}', this)" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);color:var(--accent);font-size:12px;letter-spacing:0.06em">
+          Read more ↓
+        </button>
+      </div>
+    </article>`).join('');
+
+  list.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Auto-open if hash matches
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    const post = document.getElementById(hash);
+    if (post) {
+      const body = document.getElementById('body-' + hash);
+      const btn  = post.querySelector('.bp-more');
+      if (body && btn) { body.classList.add('open'); btn.textContent = 'Collapse ↑'; }
+      setTimeout(() => post.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+    }
+  }
+}
+
+function togglePost(id, btn) {
+  const body = document.getElementById('body-' + id);
+  const open = body.classList.toggle('open');
+  btn.textContent = open ? 'Collapse ↑' : 'Read more ↓';
+  if (!open) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Load blog data
+const s = document.createElement('script');
+s.src = 'assets/blog-data.js';
+s.onload  = () => { if(window.BLOG_POSTS) renderBlog(window.BLOG_POSTS); };
+s.onerror = () => { document.getElementById('blog-page-list').innerHTML = '<p style="color:var(--muted2);padding:2rem">Could not load posts. Make sure blog-data.js is present.</p>'; };
+document.head.appendChild(s);
+</script>
+</body>
+</html>

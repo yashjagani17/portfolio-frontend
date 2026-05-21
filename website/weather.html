@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather Forecast — Yash Jagani</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">YJ<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="weather-page">
+  <div class="section-inner">
+
+    <div class="wp-header">
+      <div class="sec-tag" style="justify-content:center">FastAPI Weather Dashboard &mdash; Live Demo</div>
+      <h1>3-Day Forecast</h1>
+      <p>Powered by a live Lambda endpoint on AWS. Enter any city to fetch a 3-day forecast via the OpenWeatherMap API.</p>
+    </div>
+
+    <!-- CORS notice -->
+    <div id="cors-notice" style="max-width:520px;margin:0 auto 1.5rem;padding:12px 16px;background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.25);border-radius:6px;font-size:12px;color:#c8a83a;text-align:center;line-height:1.7">
+      ⚠ The Lambda's CORS policy is scoped to <code style="color:#f5c842">https://yashjagani.com</code>.<br>
+      When hosted there, this works live. In other environments the API call will be blocked by the browser.<br>
+      <span style="color:var(--muted2)">The fetch attempt is made regardless — it may work if your browser allows it.</span>
+    </div>
+
+    <div class="wp-search">
+      <input class="wp-input" id="wp-city" type="text" placeholder="Enter city name (e.g. London, Tokyo, New York)...">
+      <button class="btn btn-primary" onclick="wpFetch()">Get Forecast</button>
+    </div>
+
+    <div id="wp-status" class="wp-notice" style="display:none"></div>
+
+    <div class="wp-result" id="wp-result" style="display:none">
+      <div class="wp-city-header">
+        <div class="wp-city-name" id="wp-city-name"></div>
+        <div class="wp-city-country" id="wp-city-country"></div>
+      </div>
+      <div class="wp-forecast-grid" id="wp-forecast-grid"></div>
+    </div>
+
+    <!-- Architecture note -->
+    <div style="max-width:760px;margin:4rem auto 0;padding:24px 28px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg)">
+      <div class="pf-col-title" style="margin-bottom:12px">About this demo</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:12px">This page calls a real AWS Lambda function via API Gateway. The Lambda retrieves the OpenWeatherMap API key from <strong>SSM Parameter Store</strong> (SecureString, decrypted at runtime) and returns a 3-day forecast.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:14px">In the full production architecture, requests flow through <strong>CloudFront → ALB → ECS Fargate (private subnet)</strong>. For this demo, the Lambda is exposed directly via API Gateway.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn btn-ghost btn-sm" href="projects.html#weather">Full architecture →</a>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/yashjagani17" target="_blank" rel="noopener">View source →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">YJ<span>.</span></div>
+  <div>Yash Jagani &middot; Cloud &amp; DevOps Engineer</div>
+  <div style="margin-top:6px"><a href="index.html" style="color:var(--accent)">← Back to portfolio</a></div>
+</footer>
+
+<script>
+function weatherIcon(icon) {
+  const m = {'01d':'☀️','01n':'🌙','02d':'⛅','02n':'☁️','03d':'☁️','03n':'☁️','04d':'☁️','04n':'☁️','09d':'🌧️','09n':'🌧️','10d':'🌦️','10n':'🌧️','11d':'⛈️','11n':'⛈️','13d':'❄️','13n':'❄️','50d':'🌫️','50n':'🌫️'};
+  return m[icon] || '🌡️';
+}
+function formatDate(str) {
+  const d = new Date(str);
+  return d.toLocaleDateString('en-GB', { weekday:'long', month:'short', day:'numeric' });
+}
+
+async function wpFetch() {
+  const city = document.getElementById('wp-city').value.trim();
+  if (!city) return;
+  const status = document.getElementById('wp-status');
+  const result = document.getElementById('wp-result');
+  status.style.display = 'block';
+  status.innerHTML = 'Fetching forecast for <strong>' + city + '</strong><span class="loading"></span>';
+  status.style.color = 'var(--muted2)';
+  result.style.display = 'none';
+
+  try {
+    const res  = await fetch('https://328mtk9dai.execute-api.eu-west-2.amazonaws.com/weather', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ city })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'API returned an error');
+
+    document.getElementById('wp-city-name').textContent    = data.city || city;
+    document.getElementById('wp-city-country').textContent = data.country ? '📍 ' + data.country : '';
+
+    const forecasts = data.forecasts || [];
+    document.getElementById('wp-forecast-grid').innerHTML = forecasts.map(f => `
+      <div class="wp-forecast-card">
+        <div class="wfc-date">${formatDate(f.date)}</div>
+        <div class="wfc-icon">${weatherIcon(f.icon)}</div>
+        <div><span class="wfc-temp">${f.temp}</span><span class="wfc-unit">°C</span></div>
+        <div class="wfc-feels">Feels like ${f.feels_like}°C</div>
+        <div class="wfc-desc">${f.description}</div>
+        <div class="wfc-humidity">💧 Humidity ${f.humidity}%</div>
+      </div>`).join('');
+
+    status.style.display = 'none';
+    result.style.display = 'block';
+
+    // Reveal cards with stagger
+    document.querySelectorAll('.wp-forecast-card').forEach((c, i) => {
+      c.style.opacity = '0';
+      c.style.transform = 'translateY(16px)';
+      setTimeout(() => {
+        c.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        c.style.opacity = '1';
+        c.style.transform = 'none';
+      }, i * 100);
+    });
+
+  } catch(e) {
+    status.innerHTML = '✕ ' + (e.message.includes('Failed to fetch') ? 'CORS blocked — this endpoint only allows requests from yashjagani.com. Deploy the site to that domain to test live.' : e.message);
+    status.style.color = '#ff6b6b';
+  }
+}
+
+document.getElementById('wp-city').addEventListener('keydown', e => { if(e.key === 'Enter') wpFetch(); });
+
+// Auto-fetch London on load as a demo
+window.addEventListener('load', () => {
+  document.getElementById('wp-city').value = 'London';
+  wpFetch();
+});
+</script>
+</body>
+</html>
