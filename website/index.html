@@ -562,5 +562,7 @@ s.onerror = () => {
 };
 document.head.appendChild(s);
 </script>
+<script>window.addEventListener("scroll",function(){document.getElementById("scroll-top").classList.toggle("visible",window.scrollY>300);},{passive:true});</script>
+<button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
 </body>
 </html>

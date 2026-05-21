@@ -96,5 +96,7 @@ s.onload  = () => { if(window.BLOG_POSTS) renderBlog(window.BLOG_POSTS); };
 s.onerror = () => { document.getElementById('blog-page-list').innerHTML = '<p style="color:var(--muted2);padding:2rem">Could not load posts. Make sure blog-data.js is present.</p>'; };
 document.head.appendChild(s);
 </script>
+<script>window.addEventListener("scroll",function(){document.getElementById("scroll-top").classList.toggle("visible",window.scrollY>300);},{passive:true});</script>
+<button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
 </body>
 </html>

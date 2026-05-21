@@ -338,6 +338,38 @@ h3 {
 }
 .form-submit:hover { opacity: 0.85; }
 
+/* ── SCROLL TO TOP ── */
+.scroll-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 99;
+  width: 40px;
+  height: 40px;
+  background: var(--bg2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 16px;
+  transition: opacity 0.25s, transform 0.25s, border-color 0.2s, color 0.2s;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+.scroll-top.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.scroll-top:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* ── FOOTER ── */
 footer {
   border-top: 1px solid var(--border);
