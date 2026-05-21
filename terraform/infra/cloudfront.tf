@@ -8,6 +8,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 resource "aws_cloudfront_distribution" "site" {
   enabled         = true
   is_ipv6_enabled = true
+  default_root_object = "index.html"
 
   aliases = [
     var.domain_name,

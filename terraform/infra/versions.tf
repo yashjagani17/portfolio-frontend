@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket  = "yashjagani-tfstate-bucket"
-    key     = "infra/terraform.tfstate"
+    key     = "portfolio-frontend/terraform.tfstate"
     region  = "eu-west-2"
     profile = "yash"
   }
