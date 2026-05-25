@@ -59,7 +59,7 @@ function renderBlog(posts) {
       <div class="post-body" id="body-${p.id}">${p.body}</div>
       <div class="bp-footer">
         <div class="bp-tags"><span class="tag">${p.tag}</span></div>
-        <button class="bp-more" onclick="togglePost('${p.id}', this)" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);color:var(--accent);font-size:12px;letter-spacing:0.06em">
+        <button class="bp-more" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);color:var(--accent);font-size:12px;letter-spacing:0.06em">
           Read more ↓
         </button>
       </div>
@@ -80,14 +80,84 @@ function renderBlog(posts) {
   }
 }
 
-function togglePost(id, btn) {
-  const body = document.getElementById('body-' + id);
-  const open = body.classList.toggle('open');
-  btn.textContent = open ? 'Collapse ↑' : 'Read more ↓';
-  if (!open) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+
+const TEXT_TAGS = ['P', 'H3', 'LI', 'CODE', 'PRE', 'STRONG', 'EM', 'A', 'SPAN'];
+
+function isOnText(el) {
+  return TEXT_TAGS.includes(el.tagName) || el.closest(TEXT_TAGS.join(','));
 }
+
+function openPost(id) {
+  const body = document.getElementById('body-' + id);
+  const btn  = document.querySelector('#' + id + ' .bp-more');
+  if (!body || !btn) return;
+  body.classList.add('open');
+  btn.textContent = 'Collapse ↑';
+}
+
+function closePost(id) {
+  const body = document.getElementById('body-' + id);
+  const btn  = document.querySelector('#' + id + ' .bp-more');
+  if (!body || !btn) return;
+  body.classList.remove('open');
+  btn.textContent = 'Read more ↓';
+}
+
+function closeAllExcept(exceptId) {
+  document.querySelectorAll('.post-body.open').forEach(body => {
+    const id = body.id.replace('body-', '');
+    if (id !== exceptId) closePost(id);
+  });
+}
+
+let pendingAction = null; // { type: 'open'|'close', id }
+
+document.addEventListener('mousedown', function(e) {
+  pendingAction = null;
+  const article = e.target.closest('.blog-post-card');
+
+  // Clicked outside every card — queue close all
+  if (!article) {
+    const openIds = [...document.querySelectorAll('.post-body.open')].map(b => b.id.replace('body-', ''));
+    if (openIds.length) pendingAction = { type: 'closeAll', ids: openIds };
+    return;
+  }
+
+  const id   = article.id;
+  const body = document.getElementById('body-' + id);
+  const open = body && body.classList.contains('open');
+
+  if (!open) {
+    pendingAction = { type: 'open', id };
+  } else {
+    if (!isOnText(e.target)) {
+      pendingAction = { type: 'close', id };
+    }
+  }
+});
+
+document.addEventListener('mouseup', function() {
+  if (!pendingAction) return;
+
+  // If user made a text selection, cancel the action entirely
+  const sel = window.getSelection();
+  if (sel && sel.toString().length > 0) {
+    pendingAction = null;
+    return;
+  }
+
+  const action = pendingAction;
+  pendingAction = null;
+
+  if (action.type === 'open') {
+    closeAllExcept(action.id);
+    openPost(action.id);
+  } else if (action.type === 'close') {
+    closePost(action.id);
+  } else if (action.type === 'closeAll') {
+    action.ids.forEach(id => closePost(id));
+  }
+});
 
 // Load blog data
 const s = document.createElement('script');
